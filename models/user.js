@@ -21,9 +21,26 @@ class User {
   }
 
   static async findById(id) {
-    const query = 'SELECT * FROM users WHERE id = $1';
-    const result = await pool.query(query, [id]);
-    return result.rows[0];
+    try {
+      const query = `
+        SELECT 
+          id, 
+          email, 
+          name, 
+          role, 
+          is_approved,
+          COALESCE(skills, ARRAY[]::text[]) as skills,
+          COALESCE(availability, '{}'::jsonb) as availability
+        FROM users 
+        WHERE id = $1
+      `;
+      
+      const result = await pool.query(query, [id]);
+      return result.rows[0];
+    } catch (error) {
+      console.error('Error finding user by ID:', error);
+      throw error;
+    }
   }
 
   static async findAll(role = null, isApproved = null) {
@@ -72,16 +89,16 @@ class User {
       const validUpdates = Object.keys(updates)
         .filter(key => allowedFields.includes(key))
         .reduce((obj, key) => {
-          // Handle skills as an array
           if (key === 'skills') {
-            obj[key] = updates[key];
-          }
-          // Handle availability as JSON
-          else if (key === 'availability') {
-            obj[key] = updates[key];
-          }
-          // Handle name as is
-          else {
+            // Convert skills to text array
+            const skillsArray = typeof updates[key] === 'string' 
+              ? JSON.parse(updates[key]) 
+              : updates[key];
+            obj[key] = `{${skillsArray.map(skill => `"${skill}"`).join(',')}}`;
+          } else if (key === 'availability') {
+            // Handle availability as JSONB
+            obj[key] = typeof updates[key] === 'string' ? updates[key] : JSON.stringify(updates[key]);
+          } else {
             obj[key] = updates[key];
           }
           return obj;
@@ -99,7 +116,14 @@ class User {
         UPDATE users
         SET ${setClause}
         WHERE id = $1
-        RETURNING id, email, name, role, skills, availability, is_approved, updated_at
+        RETURNING 
+          id, 
+          email, 
+          name, 
+          role, 
+          is_approved,
+          COALESCE(skills, ARRAY[]::text[]) as skills,
+          COALESCE(availability, '{}'::jsonb) as availability
       `;
 
       const values = [id, ...Object.values(validUpdates)];

@@ -136,23 +136,42 @@ const userController = {
 
   async getProfile(req, res) {
     try {
-      const user = await User.findById(req.user.id);
+      console.log('Get profile request:', {
+        userId: req.user.id
+      });
+
+      const userId = req.user.id;
+      const user = await User.findById(userId);
+      
       if (!user) {
         return res.status(404).json({ message: 'User not found' });
       }
 
-      res.json({
+      console.log('User profile data:', {
+        id: user.id,
+        name: user.name,
+        skills: user.skills,
+        availability: user.availability
+      });
+
+      // Parse skills and availability if they are strings
+      const response = {
         id: user.id,
         email: user.email,
         name: user.name,
         role: user.role,
-        skills: user.skills,
-        availability: user.availability,
-        bio: user.bio
-      });
+        is_approved: user.is_approved,
+        skills: typeof user.skills === 'string' ? JSON.parse(user.skills) : user.skills || [],
+        availability: typeof user.availability === 'string' ? JSON.parse(user.availability) : user.availability || {}
+      };
+
+      res.json(response);
     } catch (error) {
-      console.error('Get profile error:', error);
-      res.status(500).json({ message: 'Error fetching profile' });
+      console.error('Error getting user profile:', error);
+      res.status(500).json({ 
+        message: 'Error getting user profile',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
     }
   },
 
@@ -174,8 +193,8 @@ const userController = {
       // Prepare updates
       const updates = {};
       if (name) updates.name = name;
-      if (skills) updates.skills = skills;
-      if (availability) updates.availability = availability;
+      if (skills) updates.skills = JSON.stringify(skills);
+      if (availability) updates.availability = JSON.stringify(availability);
 
       // Update user profile
       const updatedUser = await User.updateProfile(userId, updates);
@@ -187,15 +206,15 @@ const userController = {
       console.log('Profile updated successfully:', {
         userId: updatedUser.id,
         name: updatedUser.name,
-        hasSkills: !!updatedUser.skills,
-        hasAvailability: !!updatedUser.availability
+        skills: updatedUser.skills,
+        availability: updatedUser.availability
       });
 
       // Parse JSON fields before sending response
       const response = {
         ...updatedUser,
-        skills: updatedUser.skills || [],
-        availability: updatedUser.availability || {}
+        skills: typeof updatedUser.skills === 'string' ? JSON.parse(updatedUser.skills) : updatedUser.skills || [],
+        availability: typeof updatedUser.availability === 'string' ? JSON.parse(updatedUser.availability) : updatedUser.availability || {}
       };
 
       res.json(response);
