@@ -11,9 +11,11 @@ const registerValidation = [
     .isLength({ min: 6 })
     .withMessage('Password must be at least 6 characters long'),
   body('name').notEmpty().withMessage('Name is required'),
-  body('role').isIn(['volunteer', 'student', 'admin']).withMessage('Invalid role'),
-  body('skills').isArray().withMessage('Skills must be an array'),
-  body('availability').isObject().withMessage('Availability must be an object')
+  body('role')
+    .isIn(['student', 'volunteer', 'administrator'])
+    .withMessage('Invalid role'),
+  body('skills').optional().isArray().withMessage('Skills must be an array'),
+  body('availability').optional().isObject().withMessage('Availability must be an object')
 ];
 
 const loginValidation = [

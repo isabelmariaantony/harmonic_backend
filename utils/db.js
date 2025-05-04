@@ -2,7 +2,9 @@ const { Pool } = require('pg');
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  ssl: {
+    rejectUnauthorized: false // This allows self-signed certificates
+  }
 });
 
 // Test the connection
@@ -14,4 +16,4 @@ pool.query('SELECT NOW()', (err, res) => {
   }
 });
 
-module.exports = { pool }; 
+module.exports = pool; 
