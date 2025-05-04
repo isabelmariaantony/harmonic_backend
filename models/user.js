@@ -62,28 +62,63 @@ class User {
   }
 
   static async updateProfile(id, updates) {
-    const allowedFields = ['name', 'skills', 'availability'];
-    const validUpdates = Object.keys(updates)
-      .filter(key => allowedFields.includes(key))
-      .reduce((obj, key) => {
-        obj[key] = updates[key];
-        return obj;
-      }, {});
+    try {
+      console.log('Updating user profile:', {
+        userId: id,
+        updates
+      });
 
-    const setClause = Object.keys(validUpdates)
-      .map((key, index) => `${key} = $${index + 2}`)
-      .join(', ');
+      const allowedFields = ['name', 'skills', 'availability'];
+      const validUpdates = Object.keys(updates)
+        .filter(key => allowedFields.includes(key))
+        .reduce((obj, key) => {
+          // Handle skills as an array
+          if (key === 'skills') {
+            obj[key] = updates[key];
+          }
+          // Handle availability as JSON
+          else if (key === 'availability') {
+            obj[key] = updates[key];
+          }
+          // Handle name as is
+          else {
+            obj[key] = updates[key];
+          }
+          return obj;
+        }, {});
 
-    const query = `
-      UPDATE users
-      SET ${setClause}
-      WHERE id = $1
-      RETURNING id, email, name, role, skills, availability, is_approved, updated_at
-    `;
+      if (Object.keys(validUpdates).length === 0) {
+        throw new Error('No valid fields to update');
+      }
 
-    const values = [id, ...Object.values(validUpdates)];
-    const { rows } = await pool.query(query, values);
-    return rows[0];
+      const setClause = Object.keys(validUpdates)
+        .map((key, index) => `${key} = $${index + 2}`)
+        .join(', ');
+
+      const query = `
+        UPDATE users
+        SET ${setClause}
+        WHERE id = $1
+        RETURNING id, email, name, role, skills, availability, is_approved, updated_at
+      `;
+
+      const values = [id, ...Object.values(validUpdates)];
+      const result = await pool.query(query, values);
+      
+      if (!result.rows[0]) {
+        throw new Error('User not found');
+      }
+
+      console.log('Profile update successful:', {
+        userId: result.rows[0].id,
+        updatedFields: Object.keys(validUpdates)
+      });
+
+      return result.rows[0];
+    } catch (error) {
+      console.error('Error in updateProfile:', error);
+      throw error;
+    }
   }
 }
 

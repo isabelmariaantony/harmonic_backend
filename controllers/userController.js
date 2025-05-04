@@ -158,21 +158,53 @@ const userController = {
 
   async updateProfile(req, res) {
     try {
-      const updates = req.body;
-      const user = await User.updateProfile(req.user.id, updates);
-      
-      res.json({
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        skills: user.skills,
-        availability: user.availability,
-        bio: user.bio
+      console.log('Update profile request:', {
+        userId: req.user.id,
+        body: req.body
       });
+
+      const { name, skills, availability } = req.body;
+      const userId = req.user.id;
+
+      // Validate input
+      if (!name && !skills && !availability) {
+        return res.status(400).json({ message: 'No updates provided' });
+      }
+
+      // Prepare updates
+      const updates = {};
+      if (name) updates.name = name;
+      if (skills) updates.skills = skills;
+      if (availability) updates.availability = availability;
+
+      // Update user profile
+      const updatedUser = await User.updateProfile(userId, updates);
+      
+      if (!updatedUser) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      console.log('Profile updated successfully:', {
+        userId: updatedUser.id,
+        name: updatedUser.name,
+        hasSkills: !!updatedUser.skills,
+        hasAvailability: !!updatedUser.availability
+      });
+
+      // Parse JSON fields before sending response
+      const response = {
+        ...updatedUser,
+        skills: updatedUser.skills || [],
+        availability: updatedUser.availability || {}
+      };
+
+      res.json(response);
     } catch (error) {
-      console.error('Update profile error:', error);
-      res.status(500).json({ message: 'Error updating profile' });
+      console.error('Error updating profile:', error);
+      res.status(500).json({ 
+        message: 'Error updating profile',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
     }
   }
 };
