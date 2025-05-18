@@ -1,55 +1,123 @@
-# Harmonic Community Platform 
+# Harmonic Backend
 
-A platform connecting volunteers with those in need, powered by AI. This platform helps students, individuals with special needs, elderly, and Alzheimer's patients through AI-powered tools and volunteer support.
+This is the backend server for the Harmonic platform, a student community platform that facilitates connections between students, clubs, and organizations.
 
 ## Features
 
-- Volunteer registration and management
-- AI-powered educational tools
-- Resource hub for special needs support
-- Interactive learning modules
-- Community engagement features
+- User authentication and authorization
+- Forum posts and discussions
+- Community events management
+- Internship and volunteering opportunities
+- Learning resources sharing
+- Study session coordination
 
-## Tech Stack
+## Prerequisites
 
-- Backend: Node.js, Express.js
-- Database: PostgreSQL
-- AI Integration: OpenAI API
-- Frontend: React (coming soon)
+- Node.js (v14 or higher)
+- PostgreSQL (v12 or higher)
+- npm or yarn
 
-## Setup Instructions
+## Setup
 
 1. Clone the repository
 2. Install dependencies:
    ```bash
    npm install
    ```
-3. Create a `.env` file based on `.env.example`
-4. Set up PostgreSQL database
-5. Start the development server:
-   ```bash
-   npm run dev
+
+3. Create a PostgreSQL database named `harmonic_db`
+
+4. Create a `.env` file in the root directory with the following variables:
+   ```
+   PORT=5000
+   DB_USER=your_db_user
+   DB_HOST=localhost
+   DB_NAME=harmonic_db
+   DB_PASSWORD=your_db_password
+   DB_PORT=5432
+   JWT_SECRET=your_jwt_secret
    ```
 
-## Project Structure
+5. Run database migrations:
+   ```bash
+   psql -U your_db_user -d harmonic_db -f db/schema.sql
+   ```
 
-```
-├── server.js          # Main server file
-├── src/
-│   ├── controllers/   # Route controllers
-│   ├── models/        # Database models
-│   ├── routes/        # API routes
-│   ├── services/      # Business logic
-│   ├── utils/         # Utility functions
-│   └── middleware/    # Custom middleware
-├── tests/             # Test files
-└── public/            # Static files
+## Development
+
+Start the development server:
+```bash
+npm run dev
 ```
 
-## Contributing
+## Production
 
-Please read CONTRIBUTING.md for details on our code of conduct and the process for submitting pull requests.
+Build the TypeScript code:
+```bash
+npm run build
+```
+
+Start the production server:
+```bash
+npm start
+```
+
+## API Endpoints
+
+### Authentication
+- POST /api/auth/register - Register a new user
+- POST /api/auth/login - Login user
+
+### Users
+- GET /api/users/profile - Get user profile
+- PUT /api/users/profile - Update user profile
+- GET /api/users/:id - Get user by ID
+
+### Posts
+- GET /api/posts - Get all posts
+- POST /api/posts - Create a new post
+- GET /api/posts/:id - Get post by ID
+- PUT /api/posts/:id - Update post
+- DELETE /api/posts/:id - Delete post
+
+### Events
+- GET /api/events - Get all events
+- POST /api/events - Create a new event
+- GET /api/events/:id - Get event by ID
+- PUT /api/events/:id - Update event
+- DELETE /api/events/:id - Delete event
+- POST /api/events/:id/register - Register for event
+
+### Internships
+- GET /api/internships - Get all internships
+- POST /api/internships - Create a new internship
+- GET /api/internships/:id - Get internship by ID
+- PUT /api/internships/:id - Update internship
+- DELETE /api/internships/:id - Delete internship
+
+### Resources
+- GET /api/resources - Get all resources
+- POST /api/resources - Create a new resource
+- GET /api/resources/:id - Get resource by ID
+- PUT /api/resources/:id - Update resource
+- DELETE /api/resources/:id - Delete resource
+
+### Study Sessions
+- GET /api/study-sessions - Get all study sessions
+- POST /api/study-sessions - Create a new study session
+- GET /api/study-sessions/:id - Get study session by ID
+- PUT /api/study-sessions/:id - Update study session
+- DELETE /api/study-sessions/:id - Delete study session
+- POST /api/study-sessions/:id/join - Join study session
+- DELETE /api/study-sessions/:id/leave - Leave study session
+
+## Testing
+
+Run tests:
+```bash
+npm test
+```
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE.md file for details. 
+MIT 
