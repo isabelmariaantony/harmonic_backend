@@ -1,6 +1,8 @@
 # Harmonic Backend
 
-This is the backend server for the Harmonic platform, a student community platform that facilitates connections between students, clubs, and organizations.
+PhonoCare is a machine-learning application developed to detect heart murmurs from phonocardiogram (PCG) audio recordings. This repository contains the backend responsible for receiving uploaded audio files, connecting the application to the trained MATLAB classification model, and returning prediction results to the frontend.
+
+The underlying ML pipeline was developed using the PhysioNet/CinC 2016 and CirCor DigiScope heart-sound datasets and explores multiple classification approaches for distinguishing normal and abnormal heart sounds.
 
 ## Features
 
